@@ -2,11 +2,10 @@
 
 namespace Cookbook_1.Models
 {
-    public class Ingredient //Чёрт, мне это не нравится. Надо как то отделить кол-во и юниты от модели.
+    public class Ingredient
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public double Amount { get; set; }
-        public Units Units { get; set; } 
+        //Тут ещё будет список рецептов, чтобы получить все рецепты, где используется ингредиент
     }
 }

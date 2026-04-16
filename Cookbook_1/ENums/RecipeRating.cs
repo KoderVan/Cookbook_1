@@ -1,6 +1,6 @@
 ﻿namespace Cookbook_1.ENums
 {
-    public enum ResipeRating
+    public enum RecipeRating
     {
         VeryBad = 0,
         Bad  = 1,

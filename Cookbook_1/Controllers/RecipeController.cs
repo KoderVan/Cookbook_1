@@ -1,7 +1,6 @@
 ﻿using Cookbook_1.Abstractions;
+using Cookbook_1.Contracts;
 using Cookbook_1.ENums;
-using Cookbook_1.Models;
-using Cookbook_1.TempStorage;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cookbook_1.Controllers
@@ -11,9 +10,11 @@ namespace Cookbook_1.Controllers
     public class RecipeController : ControllerBase
     {  
         private IRecipeService _recipeService;
-        public RecipeController(IRecipeService recipeService)
+        private readonly IIngredientService _ingredientService;
+        public RecipeController(IRecipeService recipeService, IIngredientService ingredientService)
         {
             _recipeService = recipeService;
+            _ingredientService = ingredientService;
         }
         [HttpGet("recipelist")]
         public IActionResult GetRecipeList()
@@ -23,9 +24,9 @@ namespace Cookbook_1.Controllers
         }
 
         [HttpPost("newrecipe")]
-        public IActionResult CreateNewRecipe(int id,  string name, string description)
+        public IActionResult CreateNewRecipe(CreateRecipeDto dto)
         {
-            var newRecipe = _recipeService.CreateRecipe(id, name, description);
+            var newRecipe = _recipeService.CreateRecipe(dto);
             return Ok(newRecipe);
         }
 
@@ -37,9 +38,9 @@ namespace Cookbook_1.Controllers
         }
 
         [HttpPut("{id}/update")]
-        public IActionResult UpdateRecipe(int id, string? name, string? description)
+        public IActionResult UpdateRecipe(UpdateRecipeDto dto)
         {
-            _recipeService.UpdateRecipe(id, name, description); //Возвращать новый рецепт
+            _recipeService.UpdateRecipe(dto); //Возвращать новый рецепт
             return Ok();
         }
 
@@ -51,15 +52,16 @@ namespace Cookbook_1.Controllers
         }
 
         [HttpPut("{id}/rate")]
-        public IActionResult RateRecipe(int id, ResipeRating rating)
+        public IActionResult RateRecipe(int id, RecipeRating rating)
         {
             _recipeService.RateTheRecipe(id, rating);
             return Ok();
         }
+
         [HttpPost("/newingredient")]
-        public IActionResult AddIngredient(int id, string name, double amount, Units units)
+        public IActionResult AddIngredient(string name)
         {
-            _recipeService.AddIngredient(id, name, amount, units);
+            _ingredientService.AddIngredient(name);
             return Ok();
         } 
     }

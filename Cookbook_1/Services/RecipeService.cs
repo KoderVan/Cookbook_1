@@ -1,88 +1,75 @@
-﻿using Cookbook_1.Abstractions;
+﻿using AutoMapper;
+using Cookbook_1.Abstractions;
+using Cookbook_1.Contracts;
 using Cookbook_1.ENums;
 using Cookbook_1.Exceptions;
 using Cookbook_1.Models;
-using Cookbook_1.TempStorage;
+
+
 
 namespace Cookbook_1.Services
 {
     public class RecipeService : IRecipeService
     {
-        private readonly List<Recipe> _recipeList = [];
-        public static IngredientStorage Storage = new();
-        public List<Ingredient> Ingredients = Storage.GetIngredients();
-        public Recipe CreateRecipe(int id, string name, string description) //Добавить потом обработку ошибки ингредиента. Пока не хочу допом регать хранилище игредиентов чтобы с ним рабоать
+        private readonly IRecipeRepo _recipeRepo;
+        private readonly IIngredientRepo _ingredientRepo;
+        private readonly IMapper _mapper;
+        public RecipeService(IIngredientRepo ingredientRepo, IRecipeRepo recipeRepo, IMapper mapper) 
         {
-            var RecipeExists = _recipeList.Where(recipe => recipe.Id == id).FirstOrDefault();
-            if (RecipeExists != null)
-            {
-                throw new RecipeAlreadyExistsException(id);
-            }
-            var Recipe = new Recipe
-            {
-                Id = id,
-                Name = name,
-                CookingDescription = description,
-                RequieredIngredients = Ingredients,
-            };
-            _recipeList.Add(Recipe);
-            return Recipe;
+            _ingredientRepo = ingredientRepo;
+            _recipeRepo = recipeRepo;
+            _mapper = mapper;
+        }
+        public Recipe CreateRecipe(CreateRecipeDto dto)
+        {
+            var recipeVm = _recipeRepo.CreateRecipe(dto);
+            return recipeVm;
         }
 
-        public Recipe GetRecipe(int id) 
+        public RecipeVm GetRecipe(int id) 
         {
-            var recipe = _recipeList.Where(recipe => recipe.Id == id).FirstOrDefault();
+            var recipe = _recipeRepo.GetRecipe(id);
             if (recipe == null)
             {
                 throw new RecipeNotFoundException(id);
             }
+            
+            //Я так полагаю, этим надо заниматься в репе
+            //var recipeVm = new RecipeVm(recipe.Name, recipe.CookingDescription, [], recipe.Rating);
+            //foreach (var ingredient in recipe.RequieredIngredients)
+            //{
+            //    var ingredientVm = new IngredientInRecipeVm(
+            //    ingredient.Ingredient.Name,
+            //    ingredient.Amount,
+            //    ingredient.Units
+            //    );
+            //    recipeVm.RequieredIngredients.Add(ingredientVm);
+            //}
+            
             return recipe;
             
         }
 
-        public void UpdateRecipe(int id, string? newName, string? newDescription)
+        public void UpdateRecipe(UpdateRecipeDto dto)// потом добавить возможность добавлять ингредиенты
         {
-            var recipe = GetRecipe(id);
-            recipe.Name = newName ?? recipe.Name; 
-            recipe.CookingDescription = newDescription ?? recipe.CookingDescription; //Надо бы запомнить эту констркцию, выглядит круто и по умному
+            _recipeRepo.UpdateRecipe(dto); 
 
         }
         public void DeleteRecipe(int id)
         {
-            var recipe = GetRecipe(id);
-            _recipeList.Remove(recipe);
-            
+            _recipeRepo.DeleteRecipe(id);   
         }
 
-        public List<Recipe> GetAllRecipes()
+        public List<RecipeVm> GetAllRecipes()
         {
-            return _recipeList;
+            return _recipeRepo.ReturnRecipeListVm();
         }
 
-        public void RateTheRecipe(int id, ResipeRating rating)
+        public void RateTheRecipe(int id, RecipeRating rating)
         {
-            var recipe = GetRecipe(id);
-            double ratingValue = (double)rating; 
-            recipe.ListOfRatings.Add(ratingValue);
-            recipe.Rating = recipe.ListOfRatings.Sum() / recipe.ListOfRatings.Count();
+            _recipeRepo.RateTheRecipe(id, rating);
         }
 
-        public void AddIngredient(int id, string name, double amount, Units units) // В будущем буду автоматом формировать id (если вообще он нужен)
-        {
-            //IDEговорит, лучше использовать string.Equals, не понял, как юзать это с Linq
-            var checkIfIngredientExists = Ingredients.Where(ingredient => ingredient.Name.ToLower() == name.ToLower()).FirstOrDefault(); //Как будто правильнее так, а не по id
-            if (checkIfIngredientExists != null)
-            {
-                throw new IngredientAlreadyExistsException(name);
-            }
-            var newIngredient = new Ingredient
-            {
-                Id = id,
-                Name = name,
-                Amount = amount,
-                Units = units // units бы в стринге показывать, а не числом
-            };
-            Ingredients.Add(newIngredient); 
-        }
+        
     }
 }

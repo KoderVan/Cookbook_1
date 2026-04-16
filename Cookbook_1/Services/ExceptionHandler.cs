@@ -4,11 +4,11 @@ using System.Net;
 
 namespace Cookbook_1.Services
 {
-    public class ExceptionHandler : IExceptionHandler //Я так понял, это что-то встроенное
+    public class ExceptionHandler : IExceptionHandler 
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken) //ЧТо за ValueTask ещё
         {
-            httpContext.Response.StatusCode = exception switch //Пока асинк плохо знаю, но примерно понимаю что это
+            httpContext.Response.StatusCode = exception switch 
             {
                 RecipeNotFoundException => (int)HttpStatusCode.NotFound,
                 RecipeAlreadyExistsException => (int)HttpStatusCode.Conflict,
@@ -16,7 +16,7 @@ namespace Cookbook_1.Services
                 IngredientAlreadyExistsException => (int)HttpStatusCode.Conflict,
             };
 
-            await httpContext.Response.WriteAsync(exception.Message); //Пришлось с асинком писать, не понял как правильно без него сделать (просто у Мишы всё переписал)
+            await httpContext.Response.WriteAsync(exception.Message); 
             return true;
             
         }
