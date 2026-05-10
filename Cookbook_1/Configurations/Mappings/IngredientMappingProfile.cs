@@ -9,7 +9,7 @@ namespace Cookbook_1.Configurations.Mappings
         public IngredientMappingProfile()
         {
             //Указываем, из какого типа хотим получить целевой тип;
-            CreateMap<Ingredient, Ingredient>();
+            CreateMap<AddIngredientToRecipeDto, IngredientInRecipe>();
                 
         }
     }

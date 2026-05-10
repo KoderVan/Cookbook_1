@@ -11,9 +11,10 @@ namespace Cookbook_1.Configurations.Mappings
             //Сначала маппим вложенные модели
             CreateMap<IngredientInRecipe, IngredientInRecipeVm>()
                 .ForCtorParam(nameof(IngredientInRecipeVm.IngredientName),
-                 opt => opt.MapFrom(src => src.IngredientName))
+                 opt => opt.MapFrom(src => src.Ingredient.Name))
                 .ForCtorParam(nameof(IngredientInRecipeVm.Amount), opt => opt.MapFrom(src => src.Amount))
-                .ForCtorParam(nameof(IngredientInRecipeVm.Units), opt => opt.MapFrom(src => src.Units));
+                .ForCtorParam(nameof(IngredientInRecipeVm.Units), opt => opt.MapFrom(src => src.Units.ToString()));
+
             //потом сам рецепт
             CreateMap<Recipe, RecipeVm>()
                 .ForCtorParam(nameof(RecipeVm.Name), opt => opt.MapFrom(src => src.Name))
@@ -30,6 +31,7 @@ namespace Cookbook_1.Configurations.Mappings
             //    .ForCtorParam(nameof(Ingredient.Name), opt => opt.MapFrom(src => src.IngredientName));
             CreateMap<CreateRecipeDto, Recipe>();
 
+            CreateMap<AddNewIngredientToRecipeDto, IngredientInRecipe>();
         }
     }
 }

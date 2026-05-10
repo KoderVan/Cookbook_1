@@ -1,0 +1,20 @@
+﻿using Cookbook_1.Abstractions;
+using Cookbook_1.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace Cookbook_1.Database
+{
+    public class ApplicationDbContext : DbContext, IApplicationDbContext
+    {
+        public DbSet<Recipe> Recipes { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<IngredientInRecipe> IngredientsInRecipes { get; set; }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
+        }
+    }
+}

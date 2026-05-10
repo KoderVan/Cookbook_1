@@ -1,4 +1,5 @@
 ﻿using Cookbook_1.Abstractions;
+using Cookbook_1.Contracts;
 using Cookbook_1.ENums;
 using Cookbook_1.Exceptions;
 using Cookbook_1.Models;
@@ -12,7 +13,7 @@ namespace Cookbook_1.Repositories
 
         public void AddNewIngridient(string name)
         {
-            var checkIfIngredientExists = Ingredients.Where(ingredient => ingredient.Name.ToLower() == name.ToLower().Trim()).FirstOrDefault(); //Как будто правильнее так, а не по id
+            var checkIfIngredientExists = Ingredients.Where(ingredient => ingredient.Name.ToLower() == name.ToLower().Trim()).FirstOrDefault(); 
             if (checkIfIngredientExists != null)
             {
                 throw new IngredientAlreadyExistsException(name); // Нет констистентности, другая ошибка возвращает int id
@@ -47,23 +48,34 @@ namespace Cookbook_1.Repositories
 
         public List<Ingredient> GetIngredientsForRecipeById(List<int> ingredientsId)
         {
-            var IngredientsForRecipe = Ingredients.Where(i => ingredientsId.Contains(i.Id)).ToList(); //ошибочку бы тут какую обработать
-            //А что если будт неправльно переданы ID и достанется не всё? нужно это как то обрабатывать?
+            var IngredientsForRecipe = Ingredients.Where(i => ingredientsId.Contains(i.Id)).ToList();
             return IngredientsForRecipe;
         }
-
-        public void AddIngredientToRecipe(int recipeId,  int ingredientId, double amount, Units units)
+        
+        public void AddIngredientToRecipe(AddIngredientToRecipeDto dto)
         {
-            var ingredient = GetIngredientById(ingredientId);
-            var ingredientInRecipe = new IngredientInRecipe
+            var ingredient = GetIngredientById(dto.IngredientId);
+            var ingredientInRecipe = new IngredientInRecipe 
             {
-                RecipeId = recipeId,
+                RecipeId = dto.RecipeId,
                 Ingredient = ingredient,
-                IngredientName = ingredient.Name,
-                Amount = amount,
-                Units = units
+                IngredientId = ingredient.Id,
+                Amount = dto.Amount,
+                Units = dto.Units
             };
             IngredientsInRecipes.Add(ingredientInRecipe);
         } 
+        public List<Ingredient> ShowAllIngredientsForTest()
+        {
+            return Ingredients;
+        }
+        public List<IngredientInRecipe> ShowAllIngredientsInRecipeForTest()
+        {
+            foreach(var ingredient in IngredientsInRecipes)
+            {
+                var test = nameof(ingredient.Units);
+            }
+            return IngredientsInRecipes;
+        }
     }
 }

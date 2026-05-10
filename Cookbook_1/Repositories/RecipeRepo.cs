@@ -4,6 +4,7 @@ using Cookbook_1.Contracts;
 using Cookbook_1.ENums;
 using Cookbook_1.Exceptions;
 using Cookbook_1.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cookbook_1.Repositories
 {
@@ -12,15 +13,18 @@ namespace Cookbook_1.Repositories
         public List<Recipe> recipeList = [];
         private readonly IIngredientRepo _ingredientRepo;
         private readonly IMapper _mapper;
+        private readonly IApplicationDbContext _applicationDbContext;
 
-        public RecipeRepo(IIngredientRepo ingredientRepo, IMapper mapper)
+        public RecipeRepo(IIngredientRepo ingredientRepo, IMapper mapper, IApplicationDbContext applicationDbContext)
         {
             _ingredientRepo = ingredientRepo;
             _mapper = mapper;
+            _applicationDbContext = applicationDbContext;
         }
         public List<RecipeVm> ReturnRecipeListVm()
         {
-            var recipeListVm = _mapper.Map<List<RecipeVm>>(recipeList);
+           
+            var recipeListVm = _mapper.Map<List<RecipeVm>>(_applicationDbContext.Recipes.ToList());
             return recipeListVm;
         }
         
@@ -28,50 +32,94 @@ namespace Cookbook_1.Repositories
         public Recipe CreateRecipe(CreateRecipeDto dto)
         {
             var newRecipe = _mapper.Map<Recipe>(dto);
-            var recipeExists = recipeList.Where(recipe => recipe.Name == newRecipe.Name).FirstOrDefault();
+
+            var recipeExists = _applicationDbContext.Recipes.AsNoTracking().FirstOrDefault(recipe => recipe.Name == newRecipe.Name);
             if (recipeExists != null)
             {
                 throw new RecipeAlreadyExistsException(newRecipe.Name);
             }
 
-            newRecipe.Id = recipeList.Count;
             newRecipe.Name = newRecipe.Name.Trim();
-
+            
             //Этим, возможно, стоит заниматься в IngredientService
-            foreach (var ingredient in newRecipe.RequiredIngredients) //Могу конечно из dto взять, но зачем тогда маппинг
-            {
-                var ingredientExists = _ingredientRepo.GetIngredientById(ingredient.IngredientId);
+            //foreach (var ingredient in newRecipe.RequiredIngredients)
+            //
+                
+            //    var ingredientExists = _applicationDbContext.Ingredients.AsNoTracking().FirstOrDefault(i => i.Id == ingredient.IngredientId);
 
-                if(ingredientExists == null)
-                {
-                    _ingredientRepo.AddNewIngridient(ingredient.IngredientName);
-                    _ingredientRepo.AddIngredientToRecipe(newRecipe.Id, ingredient.IngredientId, ingredient.Amount, ingredient.Units);
-                    
-                }
-                else
-                {
-                    _ingredientRepo.AddIngredientToRecipe(newRecipe.Id, ingredient.IngredientId, ingredient.Amount, ingredient.Units); //по логике у меня ещё не должно его существовать в рецепте
-                    
-                }
-                ingredient.IngredientName = ingredientExists.Name;
-            }
-            recipeList.Add(newRecipe);
+            //    var newIngredientInRecipeDto = new AddIngredientToRecipeDto
+            //        (
+            //            newRecipe.Id,
+            //            ingredient.IngredientId,
+            //            ingredient.Amount,
+            //            ingredient.Units
+            //        );
+
+            //    var newIngredientInRecipe = _mapper.Map<IngredientInRecipe>(newIngredientInRecipeDto);
+            //    newRecipe.RequiredIngredients.Add(newIngredientInRecipe);
+                //_applicationDbContext.IngredientsInRecipes.Add(newIngredientInRecipe);
+                
+                //if (ingredientExists == null)
+                //{
+                //    var simpleIngredient = new Ingredient
+                //    {
+                //        Name = ingredient.IngredientName
+                //    };
+
+                //    _applicationDbContext.Ingredients.Add(simpleIngredient);
+                //    
+                //}
+                //else
+                //{
+                //    _applicationDbContext.IngredientsInRecipes.Add(ingredient);                   
+                //}
+
+            //}
+            _applicationDbContext.Recipes.Add(newRecipe);
+            _applicationDbContext.SaveChanges();
             return newRecipe;
         }
 
         public RecipeVm GetRecipe(int id)
         {
-            var recipe = recipeList.Where(recipe => recipe.Id == id).FirstOrDefault() ?? throw new RecipeNotFoundException(id);
+            var recipe = _applicationDbContext.Recipes.FirstOrDefault(recipe => recipe.Id == id) ?? throw new RecipeNotFoundException(id);
             var recipeVm = _mapper.Map<RecipeVm>(recipe);
             return recipeVm;
         }
 
         public RecipeVm UpdateRecipe(UpdateRecipeDto dto)
         {
-            var recipe = recipeList.Where(recipe => recipe.Id == dto.Id).FirstOrDefault() ?? throw new RecipeNotFoundException(dto.Id);
-            recipe.Name = dto.NewName ?? recipe.Name;
-            recipe.CookingDescription = dto.NewDescription ?? recipe.CookingDescription;
-            var recipeVm = _mapper.Map<RecipeVm>(recipe);
+            var recipeToUpdate = recipeList.Where(recipe => recipe.Id == dto.Id).FirstOrDefault() ?? throw new RecipeNotFoundException(dto.Id);
+            recipeToUpdate.Name = dto.NewName ?? recipeToUpdate.Name;
+            recipeToUpdate.CookingDescription = dto.NewDescription ?? recipeToUpdate.CookingDescription;
+
+            if (dto.NewIngredients != null)
+            {
+                foreach(var ingredient in dto.NewIngredients)
+                {
+                    var IngredientAlreadyInRecipe = recipeToUpdate.RequiredIngredients.FirstOrDefault(i => i.IngredientId == ingredient.IngredientId);
+                    if (IngredientAlreadyInRecipe != null)
+                    {
+                        throw new IngredientAlreadyExistsException(IngredientAlreadyInRecipe.Ingredient.Name); //Тут он же продолжит работу и пойдёт дальше по списку, да?
+                    }
+                    var newIngredientMap = _mapper.Map<IngredientInRecipe>(ingredient);
+                    recipeToUpdate.RequiredIngredients.Add(newIngredientMap);
+                }
+            }
+
+            if(dto.EditIngredients != null)
+            {
+                foreach(var ingredient in dto.EditIngredients)
+                {
+                    //Было бы круто иметь  dto без recipeId, и присваивать этот ID беря его из рецепта
+                    var ingredientToUpdate = recipeToUpdate.RequiredIngredients.FirstOrDefault(i => i.IngredientId == ingredient.IngredientId) 
+                        ?? throw new IngredientNotFoundException(ingredient.IngredientId);
+                    ingredientToUpdate.Ingredient.Name = ingredient.NewName ?? ingredientToUpdate.Ingredient.Name;
+                    ingredientToUpdate.Amount = ingredient.Amount ?? ingredientToUpdate.Amount;
+                    ingredientToUpdate.Units = ingredient.Units ?? ingredientToUpdate.Units;
+                }
+            }
+            var recipeVm = _mapper.Map<RecipeVm>(recipeToUpdate);
             return recipeVm;
         }
 

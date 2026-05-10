@@ -6,5 +6,5 @@ namespace Cookbook_1.Contracts
 
     public record RecipeVm(string Name, string CookingDescription, List<IngredientInRecipeVm> RequiredIngredients, double Rating);
 
-    public record UpdateRecipeDto(int Id, string? NewName, string NewDescription);
+    public record UpdateRecipeDto(int Id, string? NewName, string? NewDescription, List<AddNewIngredientToRecipeDto>? NewIngredients, List<UpdateIngredientInRecipeDto>? EditIngredients);
 }

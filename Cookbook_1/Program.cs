@@ -1,19 +1,18 @@
+using Cookbook_1;
 using Cookbook_1.Abstractions;
 using Cookbook_1.Repositories;
 using Cookbook_1.Services;
-using Microsoft.Extensions.DependencyInjection;
+
 
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
-builder.Services.AddExceptionHandler<ExceptionHandler>();
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddSwaggerGen();   
-builder.Services.AddSingleton<IRecipeRepo, RecipeRepo>();
-builder.Services.AddSingleton<IIngredientService, IngredientService>();
-builder.Services.AddSingleton<IIngredientRepo, IngredientRepo>();
-builder.Services.AddSingleton<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IRecipeRepo, RecipeRepo>();
+builder.Services.AddScoped<IIngredientService, IngredientService>();
+builder.Services.AddScoped<IIngredientRepo, IngredientRepo>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
 
 
 

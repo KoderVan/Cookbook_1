@@ -12,11 +12,10 @@ namespace Cookbook_1.Services
     public class RecipeService : IRecipeService
     {
         private readonly IRecipeRepo _recipeRepo;
-        private readonly IIngredientRepo _ingredientRepo;
         private readonly IMapper _mapper;
-        public RecipeService(IIngredientRepo ingredientRepo, IRecipeRepo recipeRepo, IMapper mapper) 
-        {
-            _ingredientRepo = ingredientRepo;
+
+        public RecipeService(IRecipeRepo recipeRepo, IMapper mapper)
+        { 
             _recipeRepo = recipeRepo;
             _mapper = mapper;
         }
@@ -28,29 +27,12 @@ namespace Cookbook_1.Services
 
         public RecipeVm GetRecipe(int id) 
         {
-            var recipe = _recipeRepo.GetRecipe(id);
-            if (recipe == null)
-            {
-                throw new RecipeNotFoundException(id);
-            }
-            
-            //Я так полагаю, этим надо заниматься в репе
-            //var recipeVm = new RecipeVm(recipe.Name, recipe.CookingDescription, [], recipe.Rating);
-            //foreach (var ingredient in recipe.RequieredIngredients)
-            //{
-            //    var ingredientVm = new IngredientInRecipeVm(
-            //    ingredient.Ingredient.Name,
-            //    ingredient.Amount,
-            //    ingredient.Units
-            //    );
-            //    recipeVm.RequieredIngredients.Add(ingredientVm);
-            //}
-            
+            var recipe = _recipeRepo.GetRecipe(id) ?? throw new RecipeNotFoundException(id); 
             return recipe;
             
         }
 
-        public void UpdateRecipe(UpdateRecipeDto dto)// потом добавить возможность добавлять ингредиенты
+        public void UpdateRecipe(UpdateRecipeDto dto)
         {
             _recipeRepo.UpdateRecipe(dto); 
 

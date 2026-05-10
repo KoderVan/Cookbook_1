@@ -10,5 +10,8 @@ namespace Cookbook_1.Abstractions
         public void AddIngredient(string name);
 
         public void AddIngredientToRecipe(AddIngredientToRecipeDto dto);
+
+        public List<Ingredient> ShowAllIngredientsForTest();
+        public List<IngredientInRecipe> ShowAllIngredientsInRecipeForTest();
     }
 }

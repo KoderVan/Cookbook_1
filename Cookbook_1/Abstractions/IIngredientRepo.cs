@@ -1,4 +1,5 @@
-﻿using Cookbook_1.ENums;
+﻿using Cookbook_1.Contracts;
+using Cookbook_1.ENums;
 using Cookbook_1.Models;
 
 namespace Cookbook_1.Abstractions
@@ -17,6 +18,10 @@ namespace Cookbook_1.Abstractions
 
         //public List<IngredientInRecipe> SetIngredientsForRecipe(int recipeId, List<Ingredient> listOfingrediens);
 
-        public void AddIngredientToRecipe(int recipeId, int ingredientId, double amount, Units units);
+        public void AddIngredientToRecipe(AddIngredientToRecipeDto dto);
+
+        public List<Ingredient> ShowAllIngredientsForTest();
+
+        public List<IngredientInRecipe> ShowAllIngredientsInRecipeForTest();
     }
 }

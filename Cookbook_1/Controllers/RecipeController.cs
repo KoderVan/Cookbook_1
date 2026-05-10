@@ -16,42 +16,43 @@ namespace Cookbook_1.Controllers
             _recipeService = recipeService;
             _ingredientService = ingredientService;
         }
-        [HttpGet("recipelist")]
+        [HttpGet("/recipelist")]
         public IActionResult GetRecipeList()
         {
             var recipes = _recipeService.GetAllRecipes();
             return Ok(recipes);
         }
 
-        [HttpPost("newrecipe")]
+        [HttpPost("/newrecipe")]
         public IActionResult CreateNewRecipe(CreateRecipeDto dto)
         {
             var newRecipe = _recipeService.CreateRecipe(dto);
             return Ok(newRecipe);
+            
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("/recipe/{id}")]
         public IActionResult GetRecipe(int id)
         {
             var recipe = _recipeService.GetRecipe(id);
             return Ok(recipe);
         }
 
-        [HttpPut("{id}/update")]
+        [HttpPut("/{id}/update")]
         public IActionResult UpdateRecipe(UpdateRecipeDto dto)
         {
             _recipeService.UpdateRecipe(dto); //Возвращать новый рецепт
             return Ok();
         }
 
-        [HttpDelete("{id}/delete")]
+        [HttpDelete("/{id}/delete")]
         public IActionResult DeleteRecipe(int id)
         {
             _recipeService.DeleteRecipe(id);
             return Ok();
         }
 
-        [HttpPut("{id}/rate")]
+        [HttpPut("/{id}/rate")]
         public IActionResult RateRecipe(int id, RecipeRating rating)
         {
             _recipeService.RateTheRecipe(id, rating);
