@@ -3,6 +3,7 @@ using Cookbook_1.Database;
 using Cookbook_1.Services;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Cookbook_1
 {
     public static class Composer
@@ -30,6 +31,10 @@ namespace Cookbook_1
                     );
             });
 
+
+            services.AddScoped<IIngredientService, IngredientService>();
+            
+            services.AddScoped<IRecipeService, RecipeService>();
             services.AddExceptionHandler<ExceptionHandler>();
             services.AddControllers();
             return services;

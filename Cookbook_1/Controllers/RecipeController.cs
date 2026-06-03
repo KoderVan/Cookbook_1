@@ -16,12 +16,6 @@ namespace Cookbook_1.Controllers
             _recipeService = recipeService;
             _ingredientService = ingredientService;
         }
-        [HttpGet("/recipelist")]
-        public IActionResult GetRecipeList()
-        {
-            var recipes = _recipeService.GetAllRecipes();
-            return Ok(recipes);
-        }
 
         [HttpPost("/newrecipe")]
         public IActionResult CreateNewRecipe(CreateRecipeDto dto)
@@ -41,7 +35,7 @@ namespace Cookbook_1.Controllers
         [HttpPut("/{id}/update")]
         public IActionResult UpdateRecipe(UpdateRecipeDto dto)
         {
-            _recipeService.UpdateRecipe(dto); //Возвращать новый рецепт
+            _recipeService.UpdateRecipe(dto); 
             return Ok();
         }
 

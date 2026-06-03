@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Cookbook_1.Abstractions;
 using Cookbook_1.Contracts;
-using Cookbook_1.ENums;
 using Cookbook_1.Exceptions;
 using Cookbook_1.Models;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +9,8 @@ namespace Cookbook_1.Services
 {
     public class IngredientService : IIngredientService
     {
-        private IApplicationDbContext _applicationDbContext; 
-        private IMapper _mapper;
+        private readonly IApplicationDbContext _applicationDbContext; 
+        private readonly IMapper _mapper;
         public IngredientService(IApplicationDbContext applicationDbContext, IMapper mapper) 
         {
             _applicationDbContext = applicationDbContext;
@@ -20,11 +19,8 @@ namespace Cookbook_1.Services
 
         public Ingredient GetIngredientById(int ingredientId)
         {
-            var ingredient = _applicationDbContext.Ingredients.AsNoTracking().FirstOrDefault(ingredient => ingredient.Id == ingredientId);
-            if (ingredient == null)
-            {
-                throw new IngredientNotFoundException(ingredientId);
-            }
+            var ingredient = _applicationDbContext.Ingredients.AsNoTracking().FirstOrDefault(ingredient => ingredient.Id == ingredientId)
+                ?? throw new IngredientNotFoundException(ingredientId);
             return ingredient;
         }
 
@@ -45,15 +41,13 @@ namespace Cookbook_1.Services
 
         public void AddIngredientToRecipe(AddIngredientToRecipeDto dto)
         {
-            var ingredient = _applicationDbContext.Ingredients.AsNoTracking().FirstOrDefault(ingredient => ingredient.Id == dto.IngredientId);
+            var ingredient = _applicationDbContext.Ingredients.AsNoTracking().FirstOrDefault(ingredient => ingredient.Id == dto.IngredientId)
+                ?? throw new IngredientNotFoundException(dto.IngredientId);
 
-            if (ingredient == null)
-            {
-                throw new IngredientNotFoundException(dto.IngredientId);
-            }
             var newIngredientInRecipe = _mapper.Map<IngredientInRecipe>(dto);
             newIngredientInRecipe.Ingredient = ingredient;
             _applicationDbContext.IngredientsInRecipes.Add(newIngredientInRecipe);
+            _applicationDbContext.SaveChanges();
         }
         
         public List<Ingredient> ShowAllIngredientsForTest()
