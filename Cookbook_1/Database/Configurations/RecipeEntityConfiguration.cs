@@ -11,6 +11,8 @@ namespace Cookbook_1.Database.Configurations
             builder.HasKey(recipe => recipe.Id);
             builder.Property(recipe => recipe.Name).IsRequired().HasMaxLength(128);
             builder.Property(recipe => recipe.CookingDescription).HasMaxLength(256);
+            // Переименовываем колонку CreatorId → UserId
+            builder.Property(r => r.UserId).HasColumnName("UserId");
         }
     }
 }

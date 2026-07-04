@@ -9,6 +9,8 @@ namespace Cookbook_1.Abstractions
         public DbSet<Ingredient> Ingredients { get;}
         public DbSet<IngredientInRecipe> IngredientsInRecipes { get; }
 
+        public DbSet<User> Users { get; }
+
         public int SaveChanges();
     }
 }

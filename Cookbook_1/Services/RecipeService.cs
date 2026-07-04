@@ -56,7 +56,7 @@ namespace Cookbook_1.Services
         public RecipeVm GetRecipe(int id)
         {
             var recipe = GetRecipeWithIngredientsOrThrowException(id);
-            var recipeVm = _mapper.Map<RecipeVm>(recipe); // не маппит название ингредиента
+            var recipeVm = _mapper.Map<RecipeVm>(recipe); 
 
             return recipeVm;
         }

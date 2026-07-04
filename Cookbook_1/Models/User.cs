@@ -2,11 +2,11 @@
 {
     public class User
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; } 
 
         public required string Login {  get; set; }
-        public required string Password { get; set; } //как тут по приватности правильно сделать?
+        public required string Password { get; set; } 
 
-        public List<Recipe> RecipeList { get; set; } 
+        public List<Recipe> UserRecipes { get; set; } = []; 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Cookbook_1.Abstractions;
 using Cookbook_1.Contracts;
 using Cookbook_1.ENums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cookbook_1.Controllers
@@ -9,7 +10,7 @@ namespace Cookbook_1.Controllers
     [Route("api/[controller]")]
     public class RecipeController : ControllerBase
     {  
-        private IRecipeService _recipeService;
+        private readonly IRecipeService _recipeService;
         private readonly IIngredientService _ingredientService;
         public RecipeController(IRecipeService recipeService, IIngredientService ingredientService)
         {
@@ -17,6 +18,7 @@ namespace Cookbook_1.Controllers
             _ingredientService = ingredientService;
         }
 
+        [Authorize]
         [HttpPost("/newrecipe")]
         public IActionResult CreateNewRecipe(CreateRecipeDto dto)
         {
@@ -25,6 +27,7 @@ namespace Cookbook_1.Controllers
             
         }
 
+        [AllowAnonymous]
         [HttpGet("/recipe/{id}")]
         public IActionResult GetRecipe(int id)
         {
@@ -32,6 +35,8 @@ namespace Cookbook_1.Controllers
             return Ok(recipe);
         }
 
+        //Тут наверно надо как то ограничить, что это может делать только создатель рецепта
+        [Authorize]
         [HttpPut("/{id}/update")]
         public IActionResult UpdateRecipe(UpdateRecipeDto dto)
         {
@@ -39,6 +44,7 @@ namespace Cookbook_1.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpDelete("/{id}/delete")]
         public IActionResult DeleteRecipe(int id)
         {
@@ -46,6 +52,7 @@ namespace Cookbook_1.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpPut("/{id}/rate")]
         public IActionResult RateRecipe(int id, RecipeRating rating)
         {
@@ -53,6 +60,7 @@ namespace Cookbook_1.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpPost("/newingredient")]
         public IActionResult AddIngredient(string name)
         {
