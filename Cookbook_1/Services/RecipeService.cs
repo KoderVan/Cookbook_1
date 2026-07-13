@@ -28,9 +28,10 @@ namespace Cookbook_1.Services
         }
 
 
-        public RecipeVm CreateRecipe(CreateRecipeDto dto)
+        public RecipeVm CreateRecipe(int userId, CreateRecipeDto dto)
         {
             var newRecipe = _mapper.Map<Recipe>(dto);
+            newRecipe.UserId = userId;
 
             var recipeExists = _applicationDbContext.Recipes.AsNoTracking().FirstOrDefault(recipe => recipe.Name == newRecipe.Name);
             if (recipeExists != null)

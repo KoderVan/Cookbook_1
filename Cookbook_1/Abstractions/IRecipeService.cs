@@ -6,7 +6,7 @@ namespace Cookbook_1.Abstractions
 {
     public interface IRecipeService
     {
-        public RecipeVm CreateRecipe(CreateRecipeDto dto);
+        public RecipeVm CreateRecipe(int userId, CreateRecipeDto dto);
 
         public RecipeVm GetRecipe(int id);
 

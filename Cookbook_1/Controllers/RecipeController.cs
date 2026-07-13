@@ -1,6 +1,7 @@
 ﻿using Cookbook_1.Abstractions;
 using Cookbook_1.Contracts;
 using Cookbook_1.ENums;
+using Cookbook_1.Extentions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,12 @@ namespace Cookbook_1.Controllers
         [HttpPost("/newrecipe")]
         public IActionResult CreateNewRecipe(CreateRecipeDto dto)
         {
-            var newRecipe = _recipeService.CreateRecipe(dto);
+            var userId = HttpContext.ExtractUserIdFromClaims();
+
+            if (userId is null)
+                return Unauthorized();
+
+            var newRecipe = _recipeService.CreateRecipe(userId.Value, dto);
             return Ok(newRecipe);
             
         }

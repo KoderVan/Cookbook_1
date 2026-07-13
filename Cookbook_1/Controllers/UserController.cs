@@ -15,7 +15,7 @@ namespace Cookbook_1.Controllers
         //Этот метод доступен без авторизации
         [AllowAnonymous]
         [HttpPost("/registration")]
-        public ActionResult<JwtTokenVm> CreateNewUser([FromBody] CreateUserDto userDto)
+        public ActionResult<LogInResponse> CreateNewUser([FromBody] CreateUserDto userDto)
         {
             var token = authService.SignUp(userDto);
             return Ok(token);
@@ -23,9 +23,12 @@ namespace Cookbook_1.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public ActionResult<JwtTokenVm> LogIn([FromBody] LogInUserDto dto)
+        public ActionResult<LogInResponse> LogIn([FromBody] LogInUserDto dto)
         {
             var result = authService.LogIn(dto.Login, dto.Password);
+            if (result is null)
+                return Unauthorized();
+
             return Ok(result); 
         }
 
@@ -39,13 +42,15 @@ namespace Cookbook_1.Controllers
             }
             return Ok(result);
         }
-        
-        //это потом убрать
-        [HttpGet("/user/{userId}")]
-        public IActionResult GetUser(int userId)
+        [HttpPost("refresh")]
+        public ActionResult<LogInResponse> Refresh([FromBody] string refreshToken)
         {
-            var user = userService.GetUserProfile(userId);
-            return Ok(user);
+            var result = authService.Refresh(refreshToken);
+            if (result is null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
         }
 
     }

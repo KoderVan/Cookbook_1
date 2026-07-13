@@ -1,6 +1,6 @@
 ﻿namespace Cookbook_1.Contracts
 {
-    public record CreateRecipeDto(int UserId, string Name, string CookingDescription, List<IngredientInRecipeDto> RequiredIngredients);
+    public record CreateRecipeDto(string Name, string CookingDescription, List<IngredientInRecipeDto> RequiredIngredients);
 
     public record RecipeVm(int UserId, string Name, string CookingDescription, List<IngredientInRecipeVm> RequiredIngredients, double Rating); 
 
