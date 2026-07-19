@@ -42,6 +42,7 @@ namespace Cookbook_1.Controllers
             }
             return Ok(result);
         }
+
         [HttpPost("refresh")]
         public ActionResult<LogInResponse> Refresh([FromBody] string refreshToken)
         {
