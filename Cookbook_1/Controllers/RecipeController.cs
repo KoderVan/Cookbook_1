@@ -41,8 +41,7 @@ namespace Cookbook_1.Controllers
             return Ok(recipe);
         }
 
-        //Тут наверно надо как то ограничить, что это может делать только создатель рецепта
-        [Authorize]
+        [Authorize(Policy = "PostOwner")]
         [HttpPut("/{id}/update")]
         public IActionResult UpdateRecipe(UpdateRecipeDto dto)
         {
@@ -50,7 +49,7 @@ namespace Cookbook_1.Controllers
             return Ok();
         }
 
-        [Authorize]
+        [Authorize (Policy = "PostOwner")]
         [HttpDelete("/{id}/delete")]
         public IActionResult DeleteRecipe(int id)
         {
@@ -62,7 +61,12 @@ namespace Cookbook_1.Controllers
         [HttpPut("/{id}/rate")]
         public IActionResult RateRecipe(int id, RecipeRating rating)
         {
-            _recipeService.RateTheRecipe(id, rating);
+            var userId = HttpContext.ExtractUserIdFromClaims();
+
+            if (userId is null)
+                return Unauthorized();
+
+            _recipeService.RateTheRecipe(id, userId.Value, rating);
             return Ok();
         }
 
@@ -72,6 +76,22 @@ namespace Cookbook_1.Controllers
         {
             _ingredientService.AddIngredient(name);
             return Ok();
-        } 
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/user{userId}/allrecipes")]
+        public IActionResult GetUsersRecipes(int userId)
+        {
+            var usersRecipes = _recipeService.GetFilteredRecipesListByUser(userId);
+            return Ok(usersRecipes);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("/filtered")]
+        public IActionResult GetFilteredRecipeList(double? minRating, int userId, string? recipeName, RecipeFilterBy filterType, bool? ascending)
+        {
+            var filteredRecipeList = _recipeService.GetFilteredRecipeList(minRating, userId, recipeName, filterType, ascending);
+            return Ok(filteredRecipeList);
+        }
     }
 }

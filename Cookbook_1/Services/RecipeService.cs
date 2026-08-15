@@ -5,6 +5,9 @@ using Cookbook_1.ENums;
 using Cookbook_1.Exceptions;
 using Cookbook_1.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Xml.Linq;
 
 
 
@@ -19,12 +22,6 @@ namespace Cookbook_1.Services
         {
             _mapper = mapper;
             _applicationDbContext = applicationDbContext;
-        }
-        public List<RecipeVm> ReturnRecipeListVm()
-        {
-
-            var recipeListVm = _mapper.Map<List<RecipeVm>>(_applicationDbContext.Recipes.ToList());
-            return recipeListVm;
         }
 
 
@@ -57,6 +54,7 @@ namespace Cookbook_1.Services
         public RecipeVm GetRecipe(int id)
         {
             var recipe = GetRecipeWithIngredientsOrThrowException(id);
+
             var recipeVm = _mapper.Map<RecipeVm>(recipe); 
 
             return recipeVm;
@@ -105,18 +103,35 @@ namespace Cookbook_1.Services
             _applicationDbContext.SaveChanges();
         }
 
-        public void RateTheRecipe(int id, RecipeRating rating)
+        public void RateTheRecipe(int id, int userId, RecipeRating rating)
         {
-            var recipe = GetRecipeWithIngredientsOrThrowException(id); // Тут можно просто рецепт без ингредиентов, но есть ли смысл?   
-            double ratingValue = (double)rating;
+            var recipe = GetRecipeWithIngredientsOrThrowException(id);
+            var existingRating = _applicationDbContext.Ratings.FirstOrDefault(r => r.RatedRecipeId == id && r.RatedUserId == userId);
+            if (existingRating is not null)
+                throw new InvalidOperationException("Пользователь уже оценил этот рецепт");
+
+            Rating ratingValue = new Rating
+            {
+                Value = rating,
+                RatedUserId = userId,
+                RatedRecipeId = id
+
+            };
+
             recipe.ListOfRatings.Add(ratingValue);
-            recipe.Rating = recipe.ListOfRatings.Average();
+            _applicationDbContext.Ratings.Add(ratingValue);
+            
+           _applicationDbContext.SaveChanges();
+
+            var ratings = _applicationDbContext.Ratings.Where(rating => rating.RatedRecipeId == id);
+            recipe.Rating = ratings.Average(r => (int)r.Value);
             _applicationDbContext.SaveChanges();
+
         }
 
         private Dictionary<int, Ingredient> GetExistingIngredients(List<IngredientInRecipe> ingredients)
         {
-            List<int> IngredientsIds = [.. ingredients.Select(i => i.IngredientId)];
+            List<int> IngredientsIds = [.. ingredients.Select(i => i.IngredientId)]; //что за две точки?
             var existingIngredients = _applicationDbContext.Ingredients.Where(i => IngredientsIds.Contains(i.Id)).ToDictionary(i => i.Id);
             return existingIngredients;
         }
@@ -127,6 +142,59 @@ namespace Cookbook_1.Services
                 .Include(i => i.RequiredIngredients)
                 .ThenInclude(i => i.Ingredient).FirstOrDefault() ?? throw new RecipeNotFoundException(recipeId);
             return recipe;
+        }
+
+        public List<RecipeVm> GetFilteredRecipesListByUser(int userId)
+        {
+            var filteredRecipes = _applicationDbContext.Recipes.Where(u => u.UserId == userId)
+                .Include(i => i.RequiredIngredients)
+                .ThenInclude(i => i.Ingredient).ToList();
+
+            if (!filteredRecipes.Any())
+            {
+                throw new UserNotFoundException(userId);
+            }
+
+            var recipeListVm = _mapper.Map<List<RecipeVm>>(filteredRecipes);
+            return recipeListVm;
+        }
+
+        public List<RecipeVm> GetFilteredRecipeList(double? minRating, int? userId, string? name, RecipeFilterBy filterType, bool? ascending)
+        {
+
+            List<RecipeVm> recipeListVm = new List<RecipeVm>();
+
+            switch (filterType)
+            {
+                case RecipeFilterBy.Title:
+                    recipeListVm = Filter(r => r.Name == name);
+                    if (!recipeListVm.Any())
+                        throw new FilterException("Рецептов с таким названием нет!");
+                    return recipeListVm;
+                case RecipeFilterBy.Rating:
+                    recipeListVm = Filter(r => r.Rating >=  minRating);
+                    if (!recipeListVm.Any())
+                        throw new FilterException("Рецептов с таким рейтингом нет!");
+                    return recipeListVm;
+                case RecipeFilterBy.User:
+                    recipeListVm = Filter(r => r.UserId == userId);
+                    if (!recipeListVm.Any())
+                        throw new FilterException("неверный id пользователя");
+                    return recipeListVm;
+                default:
+                    throw new FilterException("Неверные настройки фильтра");
+                    
+            }
+        }
+
+        private List<RecipeVm> Filter(Expression<Func<Recipe, bool>> expression)
+        {
+            var filteredRecipes = _applicationDbContext.Recipes.Where(expression)
+                .Include(i => i.RequiredIngredients)
+                .ThenInclude(i => i.Ingredient).ToList();
+
+            var recipeListVm = _mapper.Map<List<RecipeVm>>(filteredRecipes);
+            return recipeListVm;
         }
     }
 }

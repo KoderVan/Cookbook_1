@@ -2,6 +2,7 @@
 using Cookbook_1.Database;
 using Cookbook_1.Politics;
 using Cookbook_1.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using FluentValidation;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 
 namespace Cookbook_1
@@ -137,7 +140,8 @@ namespace Cookbook_1
                 .Bind(configuration.GetRequiredSection(nameof(JwtOptions)))
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
-
+            services.AddValidatorsFromAssembly(typeof(Composer).Assembly);
+            services.AddFluentValidationAutoValidation();
             services.AddControllers().AddJsonOptions(options =>
             {
                 // Говорим сериализатору обрабатывать циклы

@@ -3,6 +3,7 @@ using System;
 using Cookbook_1.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Cookbook_1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721102940_AlterRecipeTable")]
+    partial class AlterRecipeTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,7 +43,7 @@ namespace Cookbook_1.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Ingredients", (string)null);
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("Cookbook_1.Models.IngredientInRecipe", b =>
@@ -61,7 +64,7 @@ namespace Cookbook_1.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("IngredientsInRecipes", (string)null);
+                    b.ToTable("IngredientsInRecipes");
                 });
 
             modelBuilder.Entity("Cookbook_1.Models.JwtToken", b =>
@@ -89,7 +92,7 @@ namespace Cookbook_1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JwtTokens", (string)null);
+                    b.ToTable("JwtTokens");
                 });
 
             modelBuilder.Entity("Cookbook_1.Models.Rating", b =>
@@ -107,7 +110,7 @@ namespace Cookbook_1.Migrations
 
                     b.HasIndex("RatedRecipeId");
 
-                    b.ToTable("Ratings", (string)null);
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("Cookbook_1.Models.Recipe", b =>
@@ -139,7 +142,7 @@ namespace Cookbook_1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Recipes", (string)null);
+                    b.ToTable("Recipes");
                 });
 
             modelBuilder.Entity("Cookbook_1.Models.RefreshToken", b =>
@@ -167,7 +170,7 @@ namespace Cookbook_1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Cookbook_1.Models.User", b =>
@@ -190,7 +193,7 @@ namespace Cookbook_1.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Cookbook_1.Models.IngredientInRecipe", b =>

@@ -11,6 +11,9 @@ namespace Cookbook_1.Abstractions
 
         public DbSet<User> Users { get; }
 
+        public DbSet<Rating> Ratings { get; }
+
+
         public int SaveChanges();
     }
 }

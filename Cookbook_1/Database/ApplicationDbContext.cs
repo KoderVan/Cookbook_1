@@ -14,6 +14,8 @@ namespace Cookbook_1.Database
         public DbSet<JwtToken> JwtTokens { get; set; }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+        public DbSet<Rating> Ratings { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IWebHostEnvironment environment) : base(options) {}
 
         

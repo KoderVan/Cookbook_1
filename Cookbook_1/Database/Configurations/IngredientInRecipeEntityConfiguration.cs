@@ -9,7 +9,9 @@ namespace Cookbook_1.Database.Configurations
         public void Configure(EntityTypeBuilder<IngredientInRecipe> builder)
         {
             builder.HasKey(ingredient => new { ingredient.IngredientId, ingredient.RecipeId });
+
             builder.HasOne(i => i.Recipe).WithMany(r => r.RequiredIngredients).HasForeignKey(r => r.RecipeId);
+
             builder.HasOne(i => i.Ingredient).WithMany(i => i.RecipesList).HasForeignKey(i => i.IngredientId);
         }
     }

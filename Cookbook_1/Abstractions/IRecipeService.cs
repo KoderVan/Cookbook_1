@@ -1,6 +1,6 @@
 ﻿using Cookbook_1.Contracts;
 using Cookbook_1.ENums;
-using Cookbook_1.Models;
+using System.Linq.Expressions;
 
 namespace Cookbook_1.Abstractions
 {
@@ -14,8 +14,10 @@ namespace Cookbook_1.Abstractions
 
         public void DeleteRecipe(int id);
 
-        public void RateTheRecipe(int id, RecipeRating rating);
+        public void RateTheRecipe(int id, int userId, RecipeRating rating);
 
+        public List<RecipeVm> GetFilteredRecipesListByUser(int userId);
 
+        public List<RecipeVm> GetFilteredRecipeList(double? minRating, int? userId, string? name, RecipeFilterBy filterType, bool? ascending);
     }
 }

@@ -13,8 +13,13 @@ namespace Cookbook_1.Database.Configurations
             builder.Property(user => user.Password).IsRequired().HasMaxLength(256);
 
             builder.HasMany(user => user.UserRecipes)
-               .WithOne(recipe => recipe.user)
+               .WithOne(recipe => recipe.User)
                .HasForeignKey(recipe => recipe.UserId);
+
+            builder.HasMany(u => u.UserRates)
+            .WithOne(r => r.User)
+            .HasForeignKey(r => r.RatedUserId)
+            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
