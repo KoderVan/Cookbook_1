@@ -1,6 +1,5 @@
 ﻿using Cookbook_1.Abstractions;
 using Cookbook_1.Contracts;
-using Cookbook_1.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -53,6 +52,6 @@ namespace Cookbook_1.Controllers
             }
             return Ok(result);
         }
-
+        // тест гита
     }
 }
